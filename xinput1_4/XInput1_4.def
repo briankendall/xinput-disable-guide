@@ -1,0 +1,15 @@
+EXPORTS
+ordinal100 @100 NONAME
+ordinal101 @101 NONAME
+ordinal102 @102 NONAME
+ordinal103 @103 NONAME
+ordinal104 @104 NONAME
+ordinal108 @108 NONAME
+DllMain=_DllMain @1
+XInputEnable=_XInputEnable @5
+XInputGetAudioDeviceIds=_XInputGetAudioDeviceIds @10
+XInputGetBatteryInformation=_XInputGetBatteryInformation @7
+XInputGetCapabilities=_XInputGetCapabilities @4
+XInputGetKeystroke=_XInputGetKeystroke @8
+XInputGetState=_XInputGetState @2
+XInputSetState=_XInputSetState @3
