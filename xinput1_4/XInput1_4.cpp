@@ -81,7 +81,7 @@ DWORD WINAPI ordinal100(DWORD index, XINPUT_STATE *state) {
 	DWORD result = realGetState(index, state);
 
 	if (result == 0) {
-		state->Gamepad.wButtons &= (~(XINPUT_GAMEPAD_A | XINPUT_GAMEPAD_B));
+		state->Gamepad.wButtons &= (~XINPUT_GAMEPAD_GUIDE);
 	}
 
 	return result;
