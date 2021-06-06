@@ -74,14 +74,28 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 	return ( TRUE );
 }
 
+static WORD modifyButtons(WORD buttons) {
+	WORD newButtons = buttons;
+
+	if ((buttons & XINPUT_GAMEPAD_A) != 0 && (buttons & XINPUT_GAMEPAD_B) == 0) {
+		newButtons |= XINPUT_GAMEPAD_B;
+		newButtons &= (~XINPUT_GAMEPAD_A);
+	} else if ((buttons & XINPUT_GAMEPAD_B) != 0 && (buttons & XINPUT_GAMEPAD_A) == 0) {
+		newButtons |= XINPUT_GAMEPAD_A;
+		newButtons &= (~XINPUT_GAMEPAD_B);
+	}
+
+	return newButtons;
+}
+
 // XInputGetStateEx
 DWORD WINAPI ordinal100(DWORD index, XINPUT_STATE *state) {
-	typedef DWORD(__stdcall *RealGetStateType)(DWORD, XINPUT_STATE *);
-	RealGetStateType realGetState = (RealGetStateType)mProcs[0];
-	DWORD result = realGetState(index, state);
+	typedef DWORD(__stdcall *RealGetStateExType)(DWORD, XINPUT_STATE *);
+	RealGetStateExType realGetStateEx = (RealGetStateExType)mProcs[0];
+	DWORD result = realGetStateEx(index, state);
 
 	if (result == 0) {
-		state->Gamepad.wButtons &= (~XINPUT_GAMEPAD_GUIDE);
+		state->Gamepad.wButtons = modifyButtons(state->Gamepad.wButtons);
 	}
 
 	return result;
@@ -144,8 +158,16 @@ int __stdcall _XInputGetKeystroke() {
 }
 
 // XInputGetState
-int __stdcall _XInputGetState() {
-	return call_XInputGetState();
+int __stdcall _XInputGetState(DWORD index, XINPUT_STATE *state) {
+	typedef DWORD(__stdcall *RealGetStateType)(DWORD, XINPUT_STATE *);
+	RealGetStateType realGetState = (RealGetStateType)mProcs[12];
+	DWORD result = realGetState(index, state);
+
+	if (result == 0) {
+		state->Gamepad.wButtons = modifyButtons(state->Gamepad.wButtons);
+	}
+
+	return result;
 }
 
 // XInputSetState

@@ -56,6 +56,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 	if ( fdwReason == DLL_PROCESS_ATTACH ) {
 		OutputDebugString("Modified XInput1_3.dll: loading!");
 		char sysdir[255], path[255];
+		OutputDebugString("Loading modified xinput1_3.dll");
 		GetSystemDirectory( sysdir, 254 );
 		sprintf( path, "%s\\xinput1_3.dll", sysdir );
 		mHinstDLL = LoadLibrary( path );
@@ -74,13 +75,30 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 	return ( TRUE );
 }
 
+static WORD modifyButtons(WORD buttons) {
+	WORD newButtons = buttons;
+
+	// Swap A and B
+	if ((buttons & XINPUT_GAMEPAD_A) != 0 && (buttons & XINPUT_GAMEPAD_B) == 0) {
+		newButtons |= XINPUT_GAMEPAD_B;
+		newButtons &= (~XINPUT_GAMEPAD_A);
+	}
+	else if ((buttons & XINPUT_GAMEPAD_B) != 0 && (buttons & XINPUT_GAMEPAD_A) == 0) {
+		newButtons |= XINPUT_GAMEPAD_A;
+		newButtons &= (~XINPUT_GAMEPAD_B);
+	}
+
+	return newButtons;
+}
+
+// XInputGetStateEx
 DWORD WINAPI ordinal100(DWORD index, XINPUT_STATE *state) {
-	typedef DWORD (__stdcall *RealGetStateType)(DWORD, XINPUT_STATE *);
-	RealGetStateType realGetState = (RealGetStateType)mProcs[0];
-	DWORD result = realGetState(index, state);
+	typedef DWORD(__stdcall *RealGetStateExType)(DWORD, XINPUT_STATE *);
+	RealGetStateExType realGetStateEx = (RealGetStateExType)mProcs[0];
+	DWORD result = realGetStateEx(index, state);
 
 	if (result == 0) {
-		state->Gamepad.wButtons &= (~XINPUT_GAMEPAD_GUIDE);
+		state->Gamepad.wButtons = modifyButtons(state->Gamepad.wButtons);
 	}
 
 	return result;
@@ -132,8 +150,16 @@ int WINAPI _XInputGetKeystroke() {
 }
 
 // XInputGetState
-int WINAPI _XInputGetState() {
-	return call_XInputGetState();
+int __stdcall _XInputGetState(DWORD index, XINPUT_STATE *state) {
+	typedef DWORD(__stdcall *RealGetStateType)(DWORD, XINPUT_STATE *);
+	RealGetStateType realGetState = (RealGetStateType)mProcs[10];
+	DWORD result = realGetState(index, state);
+
+	if (result == 0) {
+		state->Gamepad.wButtons = modifyButtons(state->Gamepad.wButtons);
+	}
+
+	return result;
 }
 
 // XInputSetState
