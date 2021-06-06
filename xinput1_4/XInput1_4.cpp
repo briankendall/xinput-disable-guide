@@ -56,8 +56,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 	if ( fdwReason == DLL_PROCESS_ATTACH ) {
 		char sysdir[255], path[255];
 		GetSystemDirectory( sysdir, 254 );
-		sprintf( path, "%s\\XInput1_4_org.dll", sysdir );
-		printf("XInput path: %s\n", path);
+		sprintf( path, "%s\\XInput1_4.dll", sysdir );
 		mHinstDLL = LoadLibrary( path );
 		if (!mHinstDLL) {
 			char buffer[500];
