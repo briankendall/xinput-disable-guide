@@ -54,14 +54,15 @@ ULONG bufSize)                     //   buffer size
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 	mHinst = hinstDLL;
 	if ( fdwReason == DLL_PROCESS_ATTACH ) {
+		OutputDebugString("Modified XInput1_4.dll: loading!");
 		char sysdir[255], path[255];
 		GetSystemDirectory( sysdir, 254 );
 		sprintf( path, "%s\\XInput1_4.dll", sysdir );
 		mHinstDLL = LoadLibrary( path );
 		if (!mHinstDLL) {
 			char buffer[500];
-			printf("LoadLibrary failed\n");
-			printf("error: %s\n", getLastErrorText(buffer, sizeof(buffer)));
+			OutputDebugString("Modified XInput1_4.dll: LoadLibrary failed");
+			OutputDebugString(getLastErrorText(buffer, sizeof(buffer)));
 			return (FALSE);
 		}
 
